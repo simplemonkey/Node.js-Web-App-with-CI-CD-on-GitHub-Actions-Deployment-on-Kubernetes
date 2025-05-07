@@ -52,8 +52,8 @@ jobs:
     # Step 7: Deploy to AKS (Update the deployment with the new image)
     - name: Deploy to AKS
       run: | 
-        ls -a
-        kubectl apply -f deployment.yaml
+        ls -R
+        # kubectl apply -f deployment.yaml
         
 
 # kubectl set image deployment/node-k8s-app node-k8s-app=${{ secrets.DOCKER_USERNAME }}/node-k8s-app:${{ github.sha }}
