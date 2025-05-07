@@ -45,11 +45,11 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # - name: Set AKS context
-    #   run: |
-    #     az aks get-credentials --resource-group <your-resource-group> --name <your-aks-cluster-name>
+    - name: Set AKS context
+      run: |
+        az aks get-credentials --resource-group AppDeployment --name appclusterdeploy
 
     # # Step 7: Deploy to AKS (Update the deployment with the new image)
     # - name: Deploy to AKS
     #   run: |
-    #     kubectl set image deployment/node-k8s-app node-k8s-app=${{ secrets.REGISTRY_NAME }}.azurecr.io/node-k8s-app:${{ github.sha }}
+    #     kubectl set image deployment/node-k8s-app node-k8s-app=${{ secrets.DOCKER_USERNAME }}/node-k8s-app:${{ github.sha }}
