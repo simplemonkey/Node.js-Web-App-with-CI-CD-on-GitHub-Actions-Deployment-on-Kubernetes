@@ -1,0 +1,22 @@
+{
+    "name": "my-app",
+    "version": "1.0.0",
+    "description": "A brief description of your project",
+    "main": "index.js",
+    "scripts": {
+      "start": "node app.js", 
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+      "express": "^4.17.1"  
+    },
+    "devDependencies": {
+      "nodemon": "^2.0.15"    
+    },
+    "engines": {
+      "node": "14.x"          
+    },
+    "author": "simplemonkey",
+    "license": "MIT"
+  }
+  
