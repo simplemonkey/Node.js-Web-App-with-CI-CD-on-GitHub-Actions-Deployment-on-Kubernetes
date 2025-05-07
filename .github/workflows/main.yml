@@ -59,6 +59,7 @@ jobs:
       run: | 
         cd node-k8s-app
         kubectl apply -f k8s
+        kubectl get svc node-app-service
   # deploy-to-aks:
   #   runs-on: ubuntu-latest
   #   needs: build-and-push # This job depends on the 'build-and-push' job
