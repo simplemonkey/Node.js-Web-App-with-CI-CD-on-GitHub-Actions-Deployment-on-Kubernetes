@@ -65,7 +65,7 @@ jobs:
         cd node-k8s-app
         kubectl apply -f k8s
         kubectl get svc node-service
-        kubectl set image deployment/node-app node-app=${{ secrets.DOCKER_USERNAME }}/node-k8s-app:${{ github.sha }}
+        kubectl set image deployment/node-app node-app=${{ secrets.DOCKER_USERNAME }}/node-k8s-app:${{ $COMMIT_HASH }}
   # deploy-to-aks:
   #   runs-on: ubuntu-latest
   #   needs: build-and-push # This job depends on the 'build-and-push' job
