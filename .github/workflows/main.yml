@@ -23,3 +23,26 @@ jobs:
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/node-k8s-app:latest .
         docker push ${{ secrets.DOCKER_USERNAME }}/node-k8s-app:latest
+    
+    - name: Set up Azure CLI
+      uses: azure/setup-azurecli@v1
+      with:
+        azure-cli-version: latest
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v1
+      
+    # Step 6: Authenticate with Azure and AKS
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # - name: Set AKS context
+    #   run: |
+    #     az aks get-credentials --resource-group <your-resource-group> --name <your-aks-cluster-name>
+
+    # # Step 7: Deploy to AKS (Update the deployment with the new image)
+    # - name: Deploy to AKS
+    #   run: |
+    #     kubectl set image deployment/node-k8s-app node-k8s-app=${{ secrets.REGISTRY_NAME }}.azurecr.io/node-k8s-app:${{ github.sha }}
