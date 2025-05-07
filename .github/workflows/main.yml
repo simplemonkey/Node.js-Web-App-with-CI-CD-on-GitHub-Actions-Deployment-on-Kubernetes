@@ -48,15 +48,15 @@ jobs:
     - name: Set AKS context
       run: |
         az aks get-credentials --resource-group AppDeployment --name appclusterdeploy
-
+    # Step 7a : Verify the path exists
+    - name: Verify directory structure
+      run: |
+          ls -la node-k8s-app
+          ls -la node-k8s-app/k8s
     # Step 7: Deploy to AKS (Update the deployment with the new image)
     - name: Deploy to AKS
       run: | 
-        ls -la
-        echo "Deploying to AKS..."
-        echo "Current directory: $(pwd)"
         cd node-k8s-app/k8s
-        echo "Current directory: $(pwd)"
         kubectl apply -f deployment.yaml
         
 
