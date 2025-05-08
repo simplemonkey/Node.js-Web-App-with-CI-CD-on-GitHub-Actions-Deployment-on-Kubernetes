@@ -1,7 +1,13 @@
 provider "azurerm" {
   features {}
   subscription_id       = "6c63e6a3-4646-465a-8ae2-bb718ac95635"
-  storage_account_name  = "mytfstate"
-  container_name        = "tfstate"
-  key                   = "terraform.tfstate" 
+}
+
+terraform {
+  backend "azurerm" {
+    resource_group_name  = var.resource_group_name       # Replace with your resource group name
+    storage_account_name = "mytfstate"            # Replace with your storage account name
+    container_name       = "tfstate"              # Replace with your container name
+    key                  = "terraform.tfstate"    # The name of the state file
+  }
 }
