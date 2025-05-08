@@ -1,77 +1,47 @@
-# .github/workflows/ci-cd.yaml
-name: CI/CD Pipeline
+name: Build and Deploy Node.js App to AKS
 
 on:
   push:
-    branches: [main]
+    branches:
+      - develop
+
+env:
+  RESOURCE_GROUP: nodejs-rg
+  CLUSTER_NAME: nodejs-aks
+  ACR_NAME: nodejsacr123
 
 jobs:
-  build-and-push:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code
-    - name: Checkout Code
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    # Step 2: Login to Docker Hub
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    
-    - name: Get Git commit hash
-      id: get_commit_hash
-      run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-    # Step 3: Build & Push Docker Image 
-    - name: Build & Push Docker Image
-      run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/node-k8s-app:$COMMIT_HASH .
-        docker push ${{ secrets.DOCKER_USERNAME }}/node-k8s-app:$COMMIT_HASH
-    
-    # Step 4: Set up Azure CLI
-    - name: Run Azure CLI command
-      uses: azure/cli@v1
-      with:
-        azcliversion: 2.53.0 # Optional: specify version or omit
-        inlineScript: |
-          az --version
-
-    # Step 5: Set up kubectl
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v1
-      
-    # Step 6: Authenticate with Azure and AKS
-    - name: Login to Azure
+    - name: Azure Login
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    # Step 7: Set AKS context
+
+    - name: Terraform Init
+      working-directory: infra
+      run: terraform init
+
+    - name: Terraform Apply
+      working-directory: infra
+      run: terraform apply -auto-approve
+
     - name: Set AKS context
       run: |
-        az aks get-credentials --resource-group AppDeployment --name appclusterdeploy
-    
-    # Step 8a : Verify the path exists
-    - name: Verify directory structure
-      run: |
-          ls -la node-k8s-app
-          ls -la node-k8s-app/k8s
-    
-    # Step 8b: Deploy to AKS (Update the deployment with the new image)
-    - name: Deploy to AKS
-      run: | 
-        cd node-k8s-app
-        kubectl apply -f k8s
-        kubectl get svc node-service
-        kubectl set image deployment/node-app node-app=${{ secrets.DOCKER_USERNAME }}/node-k8s-app:$COMMIT_HASH
-  # deploy-to-aks:
-  #   runs-on: ubuntu-latest
-  #   needs: build-and-push # This job depends on the 'build-and-push' job
-  #   steps:
-  #   # Step 4 & 5: Instal azure cli and kubectl
-    
-        
+        az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
 
-# kubectl set image deployment/node-k8s-app node-k8s-app=${{ secrets.DOCKER_USERNAME }}/node-k8s-app:${{ github.sha }}
+    - name: Build & Push Docker Image
+      run: |
+        az acr login --name $ACR_NAME
+        docker build -t $ACR_NAME.azurecr.io/nodejs-app:latest .
+        docker push $ACR_NAME.azurecr.io/nodejs-app:latest
+
+    - name: Deploy to AKS
+      run: |
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
